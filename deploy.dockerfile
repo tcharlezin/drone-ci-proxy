@@ -13,5 +13,4 @@ WORKDIR /app
 COPY --from=builder /app/drone-ci-proxy ./
 RUN apk add --no-cache bash
 
-
-ENTRYPOINT ["/drone-ci-proxy"]
+ENTRYPOINT ["./drone-ci-proxy"]

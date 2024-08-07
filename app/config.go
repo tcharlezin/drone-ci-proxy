@@ -1,7 +1,9 @@
-package setup
+package app
 
 import (
+	"drone-ci-proxy/app/setup"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 )
@@ -9,11 +11,13 @@ import (
 type Config struct {
 	WebPort    string
 	TargetHost string
+	Log        *slog.Logger
 }
 
 var Application = Config{
 	WebPort:    os.Getenv("WEB_PORT"),
 	TargetHost: os.Getenv("TARGET_HOST"),
+	Log:        setup.SetupLog(),
 }
 
 func init() {
