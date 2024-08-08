@@ -3,11 +3,10 @@ package proxy
 import (
 	"bytes"
 	"context"
-	setup "drone-ci-proxy/app"
+	"drone-ci-proxy/app"
 	"drone-ci-proxy/cmd/handle"
 	"encoding/json"
 	"io"
-	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -43,11 +42,11 @@ func Proxy(writer http.ResponseWriter, request *http.Request) {
 	if err != nil {
 		writer.WriteHeader(http.StatusBadGateway)
 		_, _ = writer.Write([]byte("Reverse proxy not available!"))
-		log.Println("createReverseProxy - ", err)
+		app.Application.Log.Error("createReverseProxy - ", err)
 		return
 	}
 
-	log.Println("Forwarding request to reverse proxy")
+	app.Application.Log.Info("Forwarding request to reverse proxy")
 
 	reverseProxy.ModifyResponse = rewriteBody
 	reverseProxy.ServeHTTP(writer, proxyRequest)
@@ -72,13 +71,12 @@ func rewriteBody(resp *http.Response) (err error) {
 }
 
 func reverseProxyErrorHandler(writer http.ResponseWriter, request *http.Request, err error) {
-	log.Println("ReverseProxyErrorHandler: ")
-	log.Println(err.Error())
+	app.Application.Log.Error("ReverseProxyErrorHandler: ", err)
 
 	b, err := io.ReadAll(request.Body)
 
 	if err != nil {
-		log.Println("io.ReadAll - ", err)
+		app.Application.Log.Error("io.ReadAll - ", err)
 		writer.WriteHeader(http.StatusBadGateway)
 		_, _ = writer.Write([]byte("Reverse proxy not available!"))
 		return
@@ -87,7 +85,7 @@ func reverseProxyErrorHandler(writer http.ResponseWriter, request *http.Request,
 	err = request.Body.Close()
 
 	if err != nil {
-		log.Println("request.Body.Close - ", err)
+		app.Application.Log.Error("request.Body.Close - ", err)
 		writer.WriteHeader(http.StatusBadGateway)
 		_, _ = writer.Write([]byte("Reverse proxy not available!"))
 		return
@@ -100,13 +98,12 @@ func reverseProxyErrorHandler(writer http.ResponseWriter, request *http.Request,
 	err = json.Unmarshal(b, &result)
 
 	if err != nil {
-		log.Println("json.Unmarshal - ", err)
+		app.Application.Log.Error("json.Unmarshal - ", err)
 		writer.WriteHeader(http.StatusBadGateway)
 		_, _ = writer.Write([]byte("Reverse proxy not available!"))
 		return
 	}
 
-	log.Println(result)
 	writer.WriteHeader(http.StatusBadGateway)
 	_, _ = writer.Write([]byte("Reverse proxy not available!"))
 }
@@ -132,7 +129,7 @@ func getReverseProxyDirector() (func(request *http.Request), error) {
 	var err error
 	var hostAddress *url.URL
 
-	hostAddress, err = url.Parse(setup.Application.TargetHost)
+	hostAddress, err = url.Parse(app.Application.TargetHost)
 
 	if err != nil {
 		return nil, err

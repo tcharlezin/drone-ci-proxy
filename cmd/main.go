@@ -1,7 +1,7 @@
 package main
 
 import (
-	setup "drone-ci-proxy/app"
+	"drone-ci-proxy/app"
 	"drone-ci-proxy/cmd/proxy"
 	"fmt"
 	"log"
@@ -17,11 +17,11 @@ func main() {
 	mutex.HandleFunc("/", proxy.Proxy)
 
 	server := &http.Server{
-		Addr:    fmt.Sprintf(":%s", setup.Application.WebPort),
+		Addr:    fmt.Sprintf(":%s", app.Application.WebPort),
 		Handler: mutex,
 	}
 
-	log.Println(fmt.Sprintf("Starting server on :%s", setup.Application.WebPort))
+	app.Application.Log.Info(fmt.Sprintf("Starting server on :%s", app.Application.WebPort))
 	err := server.ListenAndServe()
 
 	if err != nil {

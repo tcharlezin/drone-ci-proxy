@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"log"
 	"net/http"
 )
 
@@ -19,14 +18,14 @@ func HandleHook(writer http.ResponseWriter, request *http.Request) (bool, error)
 	b, err := io.ReadAll(request.Body)
 
 	if err != nil {
-		log.Println("io.ReadAll - ", err)
+		app.Application.Log.Error("io.ReadAll - ", err)
 		return false, errors.New("can't process")
 	}
 
 	err = request.Body.Close()
 
 	if err != nil {
-		log.Println("request.Body.Close - ", err)
+		app.Application.Log.Error("request.Body.Close - ", err)
 		return false, errors.New("can't process")
 	}
 
@@ -37,7 +36,7 @@ func HandleHook(writer http.ResponseWriter, request *http.Request) (bool, error)
 	err = json.Unmarshal(b, &hookData)
 
 	if err != nil {
-		log.Println("json.Unmarshal - ", err)
+		app.Application.Log.Error("json.Unmarshal - ", err)
 		return false, errors.New("can't process")
 	}
 
