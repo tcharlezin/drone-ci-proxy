@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"drone-ci-proxy/app"
-	"drone-ci-proxy/cmd/handle"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -21,20 +20,10 @@ func (DebugTransport) RoundTrip(request *http.Request) (*http.Response, error) {
 
 func Proxy(writer http.ResponseWriter, request *http.Request) {
 
-	if request.URL.Path == "/hook" {
-
-		isFinished, err := handle.HandleHook(writer, request)
-
-		if err != nil {
-			writer.WriteHeader(http.StatusBadGateway)
-			_, _ = writer.Write([]byte(err.Error()))
-			return
-		}
-
-		if isFinished {
-			return
-		}
-	}
+	app.Application.Log.Info(request.RequestURI)
+	app.Application.Log.Info(request.Method)
+	app.Application.Log.Info(request.URL.RawQuery)
+	app.Application.Log.Info("-----------------")
 
 	proxyRequest := request.WithContext(context.TODO())
 	reverseProxy, err := createReverseProxy()
